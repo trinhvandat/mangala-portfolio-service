@@ -126,6 +126,8 @@ public class PortfolioSnapshotService {
     public PortfolioSnapshotEntity get24hAgoSnapshot(UUID portfolioId) {
         Instant time24hAgo = Instant.now().minus(24, ChronoUnit.HOURS);
         return snapshotRepository.findClosestBefore(portfolioId, time24hAgo, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
                 .orElse(null);
     }
 

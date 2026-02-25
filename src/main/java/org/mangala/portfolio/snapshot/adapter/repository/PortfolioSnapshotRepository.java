@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -24,7 +23,7 @@ public interface PortfolioSnapshotRepository extends JpaRepository<PortfolioSnap
     List<PortfolioSnapshotEntity> findLatestByPortfolioId(@Param("portfolioId") UUID portfolioId, Pageable pageable);
 
     @Query("SELECT s FROM PortfolioSnapshotEntity s WHERE s.portfolioId = :portfolioId AND s.snapshotTime <= :time ORDER BY s.snapshotTime DESC")
-    Optional<PortfolioSnapshotEntity> findClosestBefore(@Param("portfolioId") UUID portfolioId, @Param("time") Instant time, Pageable pageable);
+    List<PortfolioSnapshotEntity> findClosestBefore(@Param("portfolioId") UUID portfolioId, @Param("time") Instant time, Pageable pageable);
 
     @Query("SELECT s FROM PortfolioSnapshotEntity s WHERE s.portfolioId = :portfolioId AND s.snapshotTime BETWEEN :start AND :end ORDER BY s.snapshotTime ASC")
     List<PortfolioSnapshotEntity> findByPortfolioIdAndTimeRange(
