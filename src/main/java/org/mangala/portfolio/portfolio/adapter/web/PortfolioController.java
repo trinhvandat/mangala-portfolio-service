@@ -4,10 +4,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.mangala.portfolio.portfolio.adapter.web.dto.*;
 import org.mangala.portfolio.portfolio.usecase.*;
+import org.mangala.security.preauthenticated.PreAuthenticatedPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,9 +28,9 @@ public class PortfolioController {
 
     @PostMapping
     public ResponseEntity<PortfolioResponseDTO> createPortfolio(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @Valid @RequestBody CreatePortfolioRequestDTO request) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var command = new CreatePortfolioUseCase.CreatePortfolioCommand(
                 userId, request.getName(), request.getDescription(), request.getWalletIds());
@@ -46,8 +46,8 @@ public class PortfolioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PortfolioSummaryDTO>> listPortfolios(@AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+    public ResponseEntity<List<PortfolioSummaryDTO>> listPortfolios(@AuthenticationPrincipal PreAuthenticatedPrincipal principal) {
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var portfolios = listPortfoliosUseCase.execute(userId).stream()
                 .map(p -> PortfolioSummaryDTO.builder()
@@ -64,9 +64,9 @@ public class PortfolioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PortfolioResponseDTO> getPortfolio(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @PathVariable UUID id) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var command = new GetPortfolioUseCase.GetPortfolioCommand(id, userId);
         var response = getPortfolioUseCase.execute(command);
@@ -82,10 +82,10 @@ public class PortfolioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PortfolioResponseDTO> updatePortfolio(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @PathVariable UUID id,
             @Valid @RequestBody UpdatePortfolioRequestDTO request) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var command = new UpdatePortfolioUseCase.UpdatePortfolioCommand(
                 id, userId, request.getName(), request.getDescription());
@@ -101,9 +101,9 @@ public class PortfolioController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePortfolio(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @PathVariable UUID id) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var command = new DeletePortfolioUseCase.DeletePortfolioCommand(id, userId);
         deletePortfolioUseCase.execute(command);
@@ -113,10 +113,10 @@ public class PortfolioController {
 
     @PostMapping("/{id}/wallets")
     public ResponseEntity<PortfolioResponseDTO> addWallets(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @PathVariable UUID id,
             @Valid @RequestBody AddWalletsRequestDTO request) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var command = new ManagePortfolioWalletsUseCase.AddWalletsCommand(id, userId, request.getWalletIds());
         var response = managePortfolioWalletsUseCase.addWallets(command);
@@ -129,10 +129,10 @@ public class PortfolioController {
 
     @DeleteMapping("/{id}/wallets/{walletId}")
     public ResponseEntity<Void> removeWallet(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @PathVariable UUID id,
             @PathVariable UUID walletId) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var command = new ManagePortfolioWalletsUseCase.RemoveWalletCommand(id, userId, walletId);
         managePortfolioWalletsUseCase.removeWallet(command);

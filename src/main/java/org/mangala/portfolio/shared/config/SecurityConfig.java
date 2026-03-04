@@ -1,5 +1,6 @@
 package org.mangala.portfolio.shared.config;
 
+// PreAuthenticatedHeaderFilter is in the same package
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -8,7 +9,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Security configuration that trusts gateway-provided authentication headers.
+ *
+ * The gateway has already validated the JWT and performed authorization.
+ * This service reads user context from X-User-* headers set by the gateway.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -23,7 +31,12 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}))
+                .addFilterBefore(preAuthenticatedHeaderFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public PreAuthenticatedHeaderFilter preAuthenticatedHeaderFilter() {
+        return new PreAuthenticatedHeaderFilter();
     }
 }

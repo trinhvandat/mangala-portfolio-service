@@ -2,9 +2,9 @@ package org.mangala.portfolio.snapshot.adapter.web;
 
 import lombok.RequiredArgsConstructor;
 import org.mangala.portfolio.snapshot.usecase.GetPortfolioHistoryUseCase;
+import org.mangala.security.preauthenticated.PreAuthenticatedPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -18,10 +18,10 @@ public class PortfolioHistoryController {
 
     @GetMapping("/{id}/history")
     public ResponseEntity<GetPortfolioHistoryUseCase.GetHistoryResponse> getHistory(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @PathVariable UUID id,
             @RequestParam(defaultValue = "7d") String period) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var command = new GetPortfolioHistoryUseCase.GetHistoryCommand(id, userId, period);
         var response = getPortfolioHistoryUseCase.execute(command);

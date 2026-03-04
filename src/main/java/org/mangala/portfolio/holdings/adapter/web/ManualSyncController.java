@@ -5,9 +5,9 @@ import org.mangala.portfolio.holdings.service.HoldingsAggregationService;
 import org.mangala.portfolio.portfolio.adapter.repository.PortfolioRepository;
 import org.mangala.portfolio.shared.exception.PortfolioAccessDeniedException;
 import org.mangala.portfolio.shared.exception.PortfolioNotFoundException;
+import org.mangala.security.preauthenticated.PreAuthenticatedPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -23,9 +23,9 @@ public class ManualSyncController {
 
     @PostMapping("/{id}/sync")
     public ResponseEntity<Map<String, String>> triggerSync(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal PreAuthenticatedPrincipal principal,
             @PathVariable UUID id) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = UUID.fromString(principal.getUserId());
 
         var portfolio = portfolioRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(PortfolioNotFoundException::new);

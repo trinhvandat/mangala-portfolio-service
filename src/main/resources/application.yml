@@ -34,15 +34,11 @@ spring:
       linger-ms: 10
       buffer-memory: 33554432
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/oauth2/jwks}
+  # Security is handled by gateway - this service trusts gateway headers
+  # No OAuth2 resource server needed - user context comes from X-User-* headers
 
 server:
-  port: 8082
+  port: 8182
 
 springdoc:
   api-docs:
