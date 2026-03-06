@@ -24,6 +24,10 @@ public class PriceCacheServiceImpl implements PriceCacheService {
 
     @Override
     public void updatePrice(PriceUpdateEvent event) {
+        if (event.getSymbol() == null) {
+            log.warn("Received price update with null symbol, skipping");
+            return;
+        }
         String key = PRICE_KEY_PREFIX + event.getSymbol().toUpperCase();
         RBucket<PriceData> bucket = redissonClient.getBucket(key);
 
